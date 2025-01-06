@@ -1,3 +1,6 @@
+//Version: 0.2.0
+//Date: 2021-06-29
+
 import processing.svg.*;
 import controlP5.*;
 import java.io.File;
