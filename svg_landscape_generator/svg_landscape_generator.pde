@@ -36,6 +36,11 @@ float waterLineLength = 200; // Default water line length
 float noiseScaleX = 0.02;
 float noiseScaleY = 0.02;
 
+// New parameters for line spacing
+float horizontalSpacing = 1; // Default horizontal spacing
+float verticalSpacingFactor = 1; // Factor to adjust vertical spacing
+float lineSpacing = 10; // Default line spacing
+
 // Sun parameters
 float sunSize = 100;
 float sunX = 200;
@@ -61,7 +66,7 @@ int numMountainPoints = 100; // Number of points to define the mountain shape
 int numLines = 100; // Number of lines for the water
 
 float roughnessVariation = 0.5; // New variable for roughness variation
-float lineSpacing = 5; // Spacing between horizontal lines
+
 
 void setup() {
   fullScreen();
@@ -85,10 +90,10 @@ void setup() {
   int cp5Height = 25;
   int cp5X = 20;
   int cp5YStart = 20;
-  int cp5Spacing = 30; // Adjusted spacing for better margin
+  int cp5Spacing = 35; // Increased spacing for better margin
 
-  // Rearranged the sliders and added new sliders for spacing
-  cp5.addSlider("waterDensity", 0.01, 0.0, waterDensity, cp5X, cp5YStart, cp5Width, cp5Height)
+  // Water parameters sliders
+  cp5.addSlider("waterDensity", 0, 0.01, waterDensity, cp5X, cp5YStart, cp5Width, cp5Height)
      .setLabel("Water Density")
      .setColorLabel(color(105)) // Set label color to dark gray
      .onChange(e -> {
@@ -112,7 +117,7 @@ void setup() {
        drawScene();
      });
 
-  cp5.addSlider("waterLineLength", 2, 800, waterLineLength, cp5X, cp5YStart + cp5Spacing * 3, cp5Width, cp5Height)
+  cp5.addSlider("waterLineLength", 50, 500, waterLineLength, cp5X, cp5YStart + cp5Spacing * 3, cp5Width, cp5Height)
      .setLabel("Water Line Length")
      .setColorLabel(color(105)) // Set label color to dark gray
      .onChange(e -> {
@@ -120,6 +125,7 @@ void setup() {
        drawScene();
      });
 
+  // Sun parameters sliders
   cp5.addSlider("sunSize", 0, canvasWidth / 3, sunSize, cp5X, cp5YStart + cp5Spacing * 4, cp5Width, cp5Height)
      .setLabel("Sun Size")
      .setColorLabel(color(105)) // Set label color to dark gray
@@ -144,6 +150,7 @@ void setup() {
        drawScene();
      });
 
+  // Horizon position slider
   cp5.addSlider("horizonPosition", 0, 1, horizonPosition, cp5X, cp5YStart + cp5Spacing * 7, cp5Width, cp5Height)
      .setLabel("Horizon Position")
      .setColorLabel(color(105)) // Set label color to dark gray
@@ -152,7 +159,8 @@ void setup() {
        drawScene();
      });
 
-  cp5.addSlider("baseHeight", 1, 400, baseHeight, cp5X, cp5YStart + cp5Spacing * 8, cp5Width, cp5Height)
+  // Mountain parameters sliders
+  cp5.addSlider("baseHeight", 50, 200, baseHeight, cp5X, cp5YStart + cp5Spacing * 8, cp5Width, cp5Height)
      .setLabel("Base Height")
      .setColorLabel(color(105)) // Set label color to dark gray
      .onChange(e -> {
@@ -160,7 +168,7 @@ void setup() {
        drawScene();
      });
 
-  cp5.addSlider("peakHeight", 1, 600, peakHeight, cp5X, cp5YStart + cp5Spacing * 9, cp5Width, cp5Height)
+  cp5.addSlider("peakHeight", 50, 300, peakHeight, cp5X, cp5YStart + cp5Spacing * 9, cp5Width, cp5Height)
      .setLabel("Peak Height")
      .setColorLabel(color(105)) // Set label color to dark gray
      .onChange(e -> {
@@ -184,18 +192,10 @@ void setup() {
        drawScene();
      });
 
-  cp5.addSlider("lineSpacing", 1, 20, lineSpacing, cp5X, cp5YStart + cp5Spacing * 12, cp5Width, cp5Height)
-     .setLabel("Line Spacing")
-     .setColorLabel(color(105)) // Set label color to dark gray
-     .onChange(e -> {
-       lineSpacing = e.getController().getValue();
-       drawScene();
-     });
-
   // Add the export SVG button
   cp5.addButton("exportSVG")
      .setLabel("Export to SVG")
-     .setPosition(cp5X, cp5YStart + cp5Spacing * 13)
+     .setPosition(cp5X, cp5YStart + cp5Spacing * 12)
      .setSize(cp5Width, cp5Height)
      .onClick(e -> exportSVG());
 
@@ -267,14 +267,6 @@ void drawMountains(int horizonY) {
   strokeWeight(2);
 
   for (int m = 0; m < numMountains; m++) {
-    // Set different colors for each mountain range
-    if (m % 3 == 0) {
-      fill(34, 139, 34, 150); // Green with transparency
-    } else if (m % 3 == 1) {
-      fill(70, 130, 180, 150); // Blue with transparency
-    } else {
-      fill(255, 165, 0, 150); // Orange with transparency
-    }
     drawMountainRange(m, horizonY);
   }
 }
@@ -283,10 +275,6 @@ void drawMountainRange(int index, int horizonY) {
   float yOffset = map(index, 0, numMountains - 1, 50, 0);
   float opacity = map(index, 0, numMountains - 1, 255, 100);
   stroke(100, opacity);
-
-  // Store the mountain shape in an array
-  float[] mountainShape = new float[canvasWidth / 10 + 1];
-  int shapeIndex = 0;
 
   beginShape();
   vertex(0, horizonY);
@@ -299,27 +287,14 @@ void drawMountainRange(int index, int horizonY) {
 
     // Add sharpness
     y = pow(y / canvasHeight, sharpness) * canvasHeight;
+    // Add roughness
+    y += random(-roughness, roughness);
 
-    // Add roughness with variation
-    if (random(1) < roughnessVariation) {
-      y += random(-roughness, roughness);
-    }
-
-    mountainShape[shapeIndex++] = y;
     vertex(x, y);
   }
 
   vertex(canvasWidth, horizonY);
   endShape(CLOSE);
-
-  // Draw horizontal lines within the mountain shape
-  for (int i = 0; i < shapeIndex; i++) {
-    float x = i * 10;
-    float yTop = mountainShape[i];
-    for (float y = horizonY; y <= yTop; y += lineSpacing) {
-      line(x, y, x + 10, y);
-    }
-  }
 }
 
 void drawWater(int horizonY) {
@@ -331,10 +306,6 @@ void drawWater(int horizonY) {
 
   for (int i = 0; i < numLines; i++) {
     float yBase = map(pow(map(i, 0, numLines - 1, 0, 1), 2), 0, 1, horizonY, canvasHeight);
-    // Ensure the input range for map() is valid
-    if (horizonY == canvasHeight) {
-      yBase = horizonY;
-    }
     float lineOffset = noise(i * 0.1f + waterSeed) * 20 - 10;
 
     float lineAmplitude = map(yBase, horizonY, canvasHeight, waterAmplitude * 0.1, waterAmplitude);
@@ -422,14 +393,6 @@ void drawMountains(PGraphics pg, int horizonY) {
   pg.strokeWeight(2);
 
   for (int m = 0; m < numMountains; m++) {
-    // Set different colors for each mountain range
-    if (m % 3 == 0) {
-      pg.fill(34, 139, 34, 150); // Green with transparency
-    } else if (m % 3 == 1) {
-      pg.fill(70, 130, 180, 150); // Blue with transparency
-    } else {
-      pg.fill(255, 165, 0, 150); // Orange with transparency
-    }
     drawMountainRange(pg, m, horizonY);
   }
 }
@@ -438,10 +401,6 @@ void drawMountainRange(PGraphics pg, int index, int horizonY) {
   float yOffset = map(index, 0, numMountains - 1, 50, 0);
   float opacity = map(index, 0, numMountains - 1, 255, 100);
   pg.stroke(100, opacity);
-
-  // Store the mountain shape in an array
-  float[] mountainShape = new float[canvasWidth / 10 + 1];
-  int shapeIndex = 0;
 
   pg.beginShape();
   pg.vertex(0, horizonY);
@@ -453,35 +412,14 @@ void drawMountainRange(PGraphics pg, int index, int horizonY) {
                   horizonY - peakHeight - yOffset);
 
     y = pow(y / canvasHeight, sharpness) * canvasHeight;
+    y += random(-roughness, roughness);
 
-    // Add roughness with variation
-    if (random(1) < roughnessVariation) {
-      y += random(-roughness, roughness);
-    }
-
-    mountainShape[shapeIndex++] = y;
     pg.vertex(x, y);
   }
 
   pg.vertex(canvasWidth, horizonY);
   pg.endShape(CLOSE);
-
-  // Draw horizontal lines within the mountain shape
-  for (float y = min(mountainShape); y <= horizonY; y += lineSpacing) {
-    beginShape();
-    for (int i = 0; i < shapeIndex - 1; i++) {
-      float x1 = i * 10;
-      float x2 = (i + 1) * 10;
-
-      // Check if the y-line falls within the mountain's top contour
-      if (y <= mountainShape[i] && y <= mountainShape[i + 1]) {
-        line(x1, y, x2, y);
-      }
-    }
-    endShape();
-  }
 }
-
 
 void drawWater(PGraphics pg, int horizonY) {
   pg.stroke(0);
@@ -492,10 +430,6 @@ void drawWater(PGraphics pg, int horizonY) {
 
   for (int i = 0; i < numLines; i++) {
     float yBase = map(pow(map(i, 0, numLines - 1, 0, 1), 2), 0, 1, horizonY, canvasHeight);
-    // Ensure the input range for map() is valid
-    if (horizonY == canvasHeight) {
-      yBase = horizonY;
-    }
     float lineOffset = noise(i * 0.1f + waterSeed) * 20 - 10;
     float lineAmplitude = map(yBase, horizonY, canvasHeight, waterAmplitude * 0.1, waterAmplitude);
     float lineFrequency = random(0.005, 0.02);
