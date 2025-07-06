@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p5.js Interactive Landscape Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.dom.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/p5.js-svg@1.6.0/dist/p5.svg.min.js"></script> 
+    <style>
+    
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column; /* Stack canvas and controls vertically */
+            align-items: center; /* Center items horizontally */
+        }
+        main { /* This will be the p5.js canvas parent */
+            margin-bottom: 20px; /* Space between canvas and controls */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .controls-container {
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: auto; /* Adjust as needed, or set a max-width */
+            max-width: 500px; /* Example max-width */
+            /* margin-bottom: 20px; Removed space for Gemini outputs */
+        }
+        .control-item {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .control-item label {
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+        .control-item input[type="range"] {
+            flex-grow: 1; /* Slider takes remaining space */
+        }
+        .control-item span { /* For displaying slider value */
+            margin-left: 10px;
+            min-width: 30px; /* Ensure space for value */
+            text-align: right;
+        }
+        button {
+            padding: 10px 15px;
+            margin-top: 10px;
+            margin-right: 5px; /* Space between buttons */
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        /* Removed .gemini-output-container styles as they are no longer used */
+    </style>
+</head>
+<body>
+    <h1>Interactive Landscape Generator (p5.js)</h1>
+    
+    <main id="canvas-container"></main> 
+
+    <div class="controls-container" id="controls">
+        </div>
+
+    <script src="sketch.js"></script>
+
+
+</body></html>
